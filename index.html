@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Item Tracker</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      input,
+      button {
+        margin: 5px;
+      }
+      .section {
+        margin-top: 20px;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Item Tracker</h1>
+
+    <div class="section">
+      <h3>Add New Item</h3>
+      Item Name: <input id="itemName" type="text" /><br />
+      Submission Date (MM-DD-YYYY): <input id="itemDate" type="date" /><br />
+      <button onclick="addItem()">Add Item</button>
+    </div>
+
+    <div class="section">
+      <h3>Remove Item</h3>
+      Item Name: <input id="removeName" type="text" />
+      <button onclick="removeItem()">Remove Item</button>
+    </div>
+
+    <div class="section">
+      <h3>Check Item Age</h3>
+      Current Date (MM-DD-YYYY): <input id="currentDate" type="date" />
+      <button onclick="checkItems()">Check</button>
+    </div>
+
+    <div class="section">
+      <h3>Results</h3>
+      <pre id="results"></pre>
+    </div>
+
+    <script>
+      const items = [];
+
+      function parseDate(dateStr) {
+        return new Date(dateStr + "T00:00:00");
+      }
+
+      function daysBetween(start, end) {
+        const diff = end - start;
+        return Math.floor(diff / (1000 * 60 * 60 * 24));
+      }
+
+      function addItem() {
+        const name = document.getElementById("itemName").value.trim();
+        const dateStr = document.getElementById("itemDate").value;
+
+        if (!name || !dateStr) {
+          alert("Please enter both name and date.");
+          return;
+        }
+
+        items.push({ name, date: parseDate(dateStr) });
+        alert(`Added "${name}"`);
+      }
+
+      function removeItem() {
+        const name = document.getElementById("removeName").value.trim();
+        const index = items.findIndex((item) => item.name === name);
+        if (index !== -1) {
+          items.splice(index, 1);
+          alert(`Removed "${name}"`);
+        } else {
+          alert(`Item "${name}" not found.`);
+        }
+      }
+
+      function checkItems() {
+        const dateStr = document.getElementById("currentDate").value;
+        if (!dateStr) {
+          alert("Please enter a current date.");
+          return;
+        }
+
+        const currentDate = parseDate(dateStr);
+        let output = "";
+        const categories = {
+          less5: [],
+          between5and10: [],
+          between10and15: [],
+          more15: [],
+        };
+
+        output += "Days Since Submission:\n";
+        items.forEach((item) => {
+          const days = daysBetween(item.date, currentDate);
+          output += `${item.name}: ${days} days\n`;
+
+          if (days < 5) {
+            categories.less5.push(item.name);
+          } else if (days < 10) {
+            categories.between5and10.push(item.name);
+          } else if (days < 15) {
+            categories.between10and15.push(item.name);
+          } else {
+            categories.more15.push(item.name);
+          }
+        });
+
+        output += "\nItem Age Categories:\n";
+        output +=
+          "Less than 5 days:\n" +
+          categories.less5.map((name) => "- " + name).join("\n") +
+          "\n\n";
+        output +=
+          "5 to 9 days:\n" +
+          categories.between5and10.map((name) => "- " + name).join("\n") +
+          "\n\n";
+        output +=
+          "10 to 14 days:\n" +
+          categories.between10and15.map((name) => "- " + name).join("\n") +
+          "\n\n";
+        output +=
+          "15 or more days:\n" +
+          categories.more15.map((name) => "- " + name).join("\n");
+
+        document.getElementById("results").textContent = output;
+      }
+    </script>
+  </body>
+</html>
